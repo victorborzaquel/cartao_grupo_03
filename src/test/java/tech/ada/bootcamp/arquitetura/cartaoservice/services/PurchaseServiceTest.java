@@ -31,12 +31,14 @@ public class PurchaseServiceTest {
     private PurchaseService service;
 
     private PurchaseRequest purchaseRequest;
+    private PurchaseRequest purchasePixRequest;
     private UUID mockUUID; // Armazena o UUID aqui
 
     @BeforeEach
     void setup() {
         mockUUID = UUID.randomUUID(); // Gere o UUID uma vez
         purchaseRequest = new PurchaseRequest(mockUUID, "Generic Store", BigDecimal.ONE, PaymentMethod.CREDIT);
+        purchasePixRequest = new PurchaseRequest(mockUUID, "Generic Store", BigDecimal.ONE, PaymentMethod.PIX);
     }
 
     @Test
@@ -52,5 +54,21 @@ public class PurchaseServiceTest {
         // Assert / Verify
         Assertions.assertNotNull(responsePurchase);
         Mockito.verify(cardService, Mockito.times(1)).findOrFailById(mockUUID);
+    }
+
+    @Test
+    @DisplayName("Should successfully create a new purchase with PIX.")
+    void shouldSuccessfullyCreateNewPixPurchase() {
+
+        // Given
+        Mockito.when(cardService.findOrFailById(mockUUID)).thenReturn(new Card());
+
+        // Act - when
+        ResponsePurchase responsePurchase = service.execute(purchasePixRequest);
+
+        // Assert / Verify
+        Assertions.assertNotNull(responsePurchase);
+        Mockito.verify(cardService, Mockito.times(1)).findOrFailById(mockUUID);
+        Mockito.verify(purchaseRepository, Mockito.times(1)).save(Mockito.any());
     }
 }
